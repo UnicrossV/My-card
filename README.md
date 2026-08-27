@@ -1,1 +1,366 @@
-# My-card
+!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kyu's Profile Hub</title>
+  <!-- โหลดไลบรารีพลุ Confetti สำเร็จรูป -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      transition: background-color 0.3s, color 0.3s, border-color 0.3s;
+    }
+
+    body {
+      background-color: #0f172a;
+      color: #f8fafc;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 30px 16px;
+    }
+
+    .card {
+      position: relative;
+      background-color: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 20px;
+      padding: 24px;
+      max-width: 340px;
+      width: 100%;
+      text-align: center;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+    }
+
+    .theme-toggle-btn {
+      position: absolute;
+      top: 14px;
+      right: 14px;
+      background: none;
+      border: none;
+      font-size: 1.25rem;
+      cursor: pointer;
+    }
+
+    .profile-img {
+      width: 95px;
+      height: 95px;
+      border-radius: 50%;
+      object-fit: cover;
+      margin-bottom: 8px;
+      border: 3px solid #38bdf8;
+    }
+
+    .sub-btn {
+      background: transparent;
+      color: #38bdf8;
+      border: 1px solid #38bdf8;
+      border-radius: 6px;
+      padding: 4px 10px;
+      font-size: 0.75rem;
+      margin-bottom: 14px;
+      cursor: pointer;
+    }
+
+    h2 {
+      font-size: 1.25rem;
+      margin-bottom: 6px;
+    }
+
+    .bio-text {
+      color: #94a3b8;
+      font-size: 0.85rem;
+      line-height: 1.4;
+      margin-bottom: 18px;
+    }
+
+    /* ปุ่มส่งหัวใจ + หัวใจลอย */
+    .btn-container {
+      position: relative;
+      width: 100%;
+    }
+
+    .btn {
+      background-color: #38bdf8;
+      color: #0f172a;
+      border: none;
+      padding: 10px 18px;
+      border-radius: 8px;
+      font-weight: bold;
+      font-size: 0.9rem;
+      cursor: pointer;
+      width: 100%;
+      transition: transform 0.1s, background-color 0.2s;
+    }
+
+    .btn:active {
+      background-color: #0284c7;
+      transform: scale(0.96);
+    }
+
+    .floating-heart {
+      position: absolute;
+      font-size: 1.5rem;
+      left: 50%;
+      top: -10px;
+      pointer-events: none;
+      animation: floatUp 0.8s ease-out forwards;
+    }
+
+    @keyframes floatUp {
+      0% {
+        opacity: 1;
+        transform: translate(-50%, 0) scale(0.8);
+      }
+      50% {
+        transform: translate(calc(-50% + (var(--random-x, 0px))), -45px) scale(1.3);
+      }
+      100% {
+        opacity: 0;
+        transform: translate(calc(-50% + (var(--random-x, 0px))), -85px) scale(1);
+      }
+    }
+
+    .counter {
+      margin-top: 12px;
+      font-size: 0.85rem;
+      color: #cbd5e1;
+    }
+
+    .link-group {
+      margin-top: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .link-btn {
+      display: block;
+      background-color: #334155;
+      color: #ffffff;
+      text-decoration: none;
+      padding: 9px;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      font-weight: 500;
+    }
+
+    .link-btn:active {
+      background-color: #475569;
+    }
+
+    /* Guestbook Section */
+    .guestbook-section {
+      margin-top: 20px;
+      border-top: 1px solid #334155;
+      padding-top: 16px;
+      text-align: left;
+    }
+
+    .guestbook-section h3 {
+      font-size: 0.95rem;
+      margin-bottom: 8px;
+      text-align: center;
+    }
+
+    .input-box {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 12px;
+    }
+
+    .input-box input {
+      flex: 1;
+      padding: 8px 12px;
+      border-radius: 6px;
+      border: 1px solid #475569;
+      background-color: #0f172a;
+      color: #f8fafc;
+      font-size: 0.8rem;
+      outline: none;
+    }
+
+    .input-box button {
+      background-color: #38bdf8;
+      color: #0f172a;
+      border: none;
+      padding: 8px 12px;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .message-list {
+      max-height: 120px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .msg-item {
+      background-color: #0f172a;
+      padding: 6px 10px;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      color: #cbd5e1;
+      word-break: break-word;
+      border-left: 3px solid #38bdf8;
+    }
+
+    /* Light Mode */
+    body.light-mode {
+      background-color: #f1f5f9;
+      color: #0f172a;
+    }
+    body.light-mode .card {
+      background-color: #ffffff;
+      border-color: #e2e8f0;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+    }
+    body.light-mode .bio-text {
+      color: #64748b;
+    }
+    body.light-mode .counter {
+      color: #475569;
+    }
+    body.light-mode .link-btn {
+      background-color: #f8fafc;
+      color: #0f172a;
+      border: 1px solid #cbd5e1;
+    }
+    body.light-mode .guestbook-section {
+      border-top-color: #e2e8f0;
+    }
+    body.light-mode .input-box input {
+      background-color: #f8fafc;
+      border-color: #cbd5e1;
+      color: #0f172a;
+    }
+    body.light-mode .msg-item {
+      background-color: #f8fafc;
+      color: #334155;
+      border-left-color: #0284c7;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="card">
+    <button class="theme-toggle-btn" onclick="toggleTheme()" id="theme-btn">☀️</button>
+
+    <!-- รูปเริ่มต้น: ล็อกรูปมีมตาตื่นไว้แน่นอน -->
+    <img id="profile-pic" src="https://i.imgflip.com/4/4t0m5.jpg" alt="Avatar" class="profile-img">
+    <br>
+    <button class="sub-btn" onclick="changePhoto()">สลับรูป 🐶 / 🐱</button>
+
+    <h2>สวัสดี! ฉันคือคิว</h2>
+    <p class="bio-text">เขียนโค้ดและรันพรีวิวผ่านแอป Koder บนมือถือได้เรียบร้อยแล้ว</p>
+    
+    <div class="btn-container" id="heart-box">
+      <button class="btn" onclick="addLike()">กดส่งหัวใจ ❤️</button>
+    </div>
+    <div class="counter">ยอดหัวใจ: <span id="like-count">0</span></div>
+
+    <div class="link-group">
+      <a href="https://instagram.com" target="_blank" class="link-btn">📷 Instagram</a>
+      <a href="https://github.com" target="_blank" class="link-btn">💻 My GitHub</a>
+    </div>
+
+    <!-- ส่วนสมุดบันทึกทักทาย (Guestbook) -->
+    <div class="guestbook-section">
+      <h3>💬 ฝากข้อความทักทาย</h3>
+      <div class="input-box">
+        <input type="text" id="guest-input" placeholder="พิมพ์ข้อความที่นี่...">
+        <button onclick="addMessage()">ส่ง</button>
+      </div>
+      <div class="message-list" id="msg-container"></div>
+    </div>
+  </div>
+
+  <script>
+    // --- 1. จัดการระบบยอดหัวใจ + LocalStorage + Confetti ---
+    let count = parseInt(localStorage.getItem('kyu_likes')) || 0;
+    document.getElementById('like-count').innerText = count;
+
+    function addLike() {
+      count++;
+      document.getElementById('like-count').innerText = count;
+      localStorage.setItem('kyu_likes', count); // บันทึกลงเครื่อง
+
+      // เอฟเฟกต์หัวใจลอย
+      const heartBox = document.getElementById('heart-box');
+      const heart = document.createElement('span');
+      heart.classList.add('floating-heart');
+      heart.innerText = '❤️';
+      const randomX = (Math.random() - 0.5) * 60;
+      heart.style.setProperty('--random-x', `${randomX}px`);
+      heartBox.appendChild(heart);
+      setTimeout(() => heart.remove(), 800);
+
+      // ยิงพลุเมื่อครบทุก 10 ครั้ง
+      if (count % 10 === 0 && count !== 0) {
+        confetti({
+          particleCount: 80,
+          spread: 70,
+          origin: { y: 0.6 }
+        });
+      }
+    }
+
+    // --- 2. จัดการรูปภาพ (ล็อกภาพแน่นอน) ---
+    const photos = [
+      "https://i.imgflip.com/4/4t0m5.jpg", // หมาตาตื่น
+      "https://i.imgflip.com/4/1ot29m.jpg"  // แมวมีม
+    ];
+    let photoIndex = 0;
+    function changePhoto() {
+      photoIndex = (photoIndex + 1) % photos.length;
+      document.getElementById('profile-pic').src = photos[photoIndex];
+    }
+
+    // --- 3. จัดการสลับธีม Dark / Light ---
+    function toggleTheme() {
+      const body = document.body;
+      const themeBtn = document.getElementById('theme-btn');
+      body.classList.toggle('light-mode');
+      themeBtn.innerText = body.classList.contains('light-mode') ? '🌙' : '☀️';
+    }
+
+    // --- 4. จัดการสมุดบันทึกทักทาย (Guestbook) + LocalStorage ---
+    let messages = JSON.parse(localStorage.getItem('kyu_msgs')) || ["ยินดีต้อนรับสู่เว็บแรกของฉัน!"];
+
+    function renderMessages() {
+      const container = document.getElementById('msg-container');
+      container.innerHTML = '';
+      messages.slice().reverse().forEach(msg => {
+        const div = document.createElement('div');
+        div.classList.add('msg-item');
+        div.innerText = msg;
+        container.appendChild(div);
+      });
+    }
+
+    function addMessage() {
+      const input = document.getElementById('guest-input');
+      const text = input.value.trim();
+      if (text !== '') {
+        messages.push(text);
+        localStorage.setItem('kyu_msgs', JSON.stringify(messages)); // บันทึกลงเครื่อง
+        renderMessages();
+        input.value = '';
+      }
+    }
+
+    // โหลดข้อความขึ้นมาแสดงทันทีที่เปิดเว็บ
+    renderMessages();
+  </script>
+
+</body>
+</html>
